@@ -116,4 +116,11 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    implementation(project(':react-native-camera')) {
+        capabilities {
+            requireCapability("molusys_corp:react-native-camera:mlkit")
+        }
+    }
+
 }
