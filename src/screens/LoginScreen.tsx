@@ -1,21 +1,47 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, ActivityIndicator } from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  ActivityIndicator,
+} from 'react-native';
 import SessionStorage from 'react-native-session-storage';
-// Get screen dimensions
-const { width, height } = Dimensions.get('window');
+import {Toast, ALERT_TYPE} from 'react-native-alert-notification';
+import normalize from 'react-native-normalize';
+// import Animated, {
+//   useSharedValue,
+//   useAnimatedStyle,
+//   withSpring,
+//   withRepeat,
+// } from 'react-native-reanimated';
 
-const LoginScreen = ({ navigation }) => {
+const {width, height} = Dimensions.get('window');
+
+const LoginScreen = ({navigation}) => {
   const [email, setEmail] = useState('admin@williex.com');
   const [password, setPassword] = useState('1701W1990');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  // const offset = useSharedValue(width / 2 - 240);
+
+  // const animatedStyles = useAnimatedStyle(() => ({
+  //   transform: [{translateX: offset.value}],
+  // }));
+
+  // React.useEffect(() => {
+  //   offset.value = withRepeat(withSpring(-offset.value), -1, true);
+  // }, [offset]);
 
   const handleLogin = async () => {
     setError('');
     setLoading(true);
     try {
-      const apiUrl = 'https://mobileapi.molusys.com/mobile-adaptor/v1.0.0/authentication';
+      const apiUrl =
+        'https://mobileapi.molusys.com/mobile-adaptor/v1.0.0/authentication';
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
@@ -34,25 +60,34 @@ const LoginScreen = ({ navigation }) => {
       const data = await response.json();
 
       if (data.status) {
-        console.log(data)
+        console.log(data);
         storeToken(data.token);
-        // 
+        //
       } else {
-        alert('Invalid credentials');
+        Toast.show({
+          type: ALERT_TYPE.DANGER,
+          title: 'Login error',
+          textBody: 'Invalid credentials',
+        });
       }
     } catch (error) {
-      alert(error.message);
+      console.log(error.Error);
+      Toast.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Login error',
+        textBody: 'error',
+      });
     } finally {
       setLoading(false); // Ensure spinner stops after login attempt
     }
   };
 
-  const storeToken = async (token) => {
+  const storeToken = async token => {
     try {
       // Store the token in session storage
       await SessionStorage.setItem('@token_data', token);
       await SessionStorage.setItem('@domain', email.split('@')[1]);
-  
+
       // Retrieve the stored token to confirm
       const storedToken = await SessionStorage.getItem('@token_data');
       if (storedToken !== null) {
@@ -66,7 +101,7 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container]}>
       <Text style={styles.loginText}>ACCOUNT AUTHENTICATION</Text>
 
       {/* Input fields for email and password */}
@@ -89,7 +124,13 @@ const LoginScreen = ({ navigation }) => {
       {/* Login Button */}
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <View style={styles.buttonContent}>
-          {loading && <ActivityIndicator size="small" color="#fff" style={styles.spinner} />}
+          {loading && (
+            <ActivityIndicator
+              size="small"
+              color="#fff"
+              style={styles.spinner}
+            />
+          )}
           <Text style={styles.buttonText}>AUTHENTICATE</Text>
         </View>
       </TouchableOpacity>
@@ -109,9 +150,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.05, // 5% of screen width
   },
   loginText: {
-    fontSize: width * 0.03, // Responsive font size
+    fontSize: normalize(15), // Responsive font size
     color: '#333333',
-    fontWeight: 'bold',
+    //fontWeight: 'bold',
+    fontFamily: 'Poppins-ExtraBold',
     textAlign: 'right',
     marginBottom: height * 0.03, // 3% of screen height for spacing
   },
@@ -126,6 +168,7 @@ const styles = StyleSheet.create({
     fontSize: width * 0.03,
     color: '#333333',
     marginBottom: height * 0.02,
+    fontFamily: 'Poppins-Regular',
   },
   button: {
     width: '90%',
@@ -146,7 +189,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontSize: width * 0.03,
-    fontWeight: '500',
+    fontFamily: 'Poppins-Bold',
   },
   errorText: {
     color: '#FF4D4D',

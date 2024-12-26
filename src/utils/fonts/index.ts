@@ -1,4 +1,4 @@
-import { Text, TextInput } from 'react-native';
+import {Text, TextInput} from 'react-native';
 
 export const setGlobalFont = (fontName: string) => {
   // Override the default font globally for Text and TextInput components

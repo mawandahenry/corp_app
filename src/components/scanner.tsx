@@ -1,85 +1,108 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions } from 'react-native';
-import QRCodeScanner from 'react-native-qrcode-scanner';
+import React, {forwardRef} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import Modal from 'react-native-modal';
+import {ReactNativeScannerView} from '@pushpendersingh/react-native-scanner';
+import normalize from 'react-native-normalize';
 
-const { width, height } = Dimensions.get('window');
+const {width, height} = Dimensions.get('window');
 
-const BarcodeScannerModal = ({ onClose, onBarcodeScan, title, data}) => {
-
-  useEffect(() => {
-    // Simulate a barcode scan after the component loads
-    console.log('scanner data',data)
-    const simulatedData = data;
-    handleBarcodeScan(simulatedData);
-  }, []);
-
-  const handleBarcodeScan = (e) => {
-    // console.log(e.data)
-    // onBarcodeScan(e.data); // Pass scanned data back to parent
-    onBarcodeScan(e); 
-    onClose(); // Close modal
-  };
+const BarcodeScannerModal = forwardRef((props, ref) => {
+  const {
+    onClose,
+    handleBarcodeScanned,
+    stopScanning,
+    resumeScanning,
+    disableFlashlight,
+    enableFlashlight,
+    releaseCamera,
+    startScanning,
+    isActive,
+    activate,
+    deactivate,
+    open,
+    scan,
+  } = props;
 
   return (
     <Modal
-      isVisible={true} // Ensure this prop is used to show/hide modal
+      isVisible={open} // Ensure this prop is used to show/hide modal
       onBackButtonPress={onClose} // Close modal on back press
       onBackdropPress={onClose} // Close modal on backdrop press
-    >
+      hasBackdrop={true}
+      backdropColor="white"
+      backdropOpacity={0.7}>
       <View style={styles.modalContainer}>
-        <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-          <Text style={styles.closeButtonText}>Close</Text>
-        </TouchableOpacity>
+        <View style={styles.close}>
+          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+            <Text style={styles.closeButtonText}>Close</Text>
+          </TouchableOpacity>
+        </View>
 
-        <QRCodeScanner
-          onRead={handleBarcodeScan}
-          showMarker={true}
-          reactivate={true}
-          reactivateTimeout={3000}
-          cameraStyle={styles.camera}
-        />
-        <Text style={styles.scanInstructions}>{title}</Text>
+        <View style={styles.scannerWrapper}>
+          <View style={styles.scanner}>
+            <ReactNativeScannerView
+              ref={ref}
+              style={styles.scannerBox}
+              onQrScanned={even => handleBarcodeScanned(even)}
+              pauseAfterCapture={true} // Pause the scanner after barcode / QR code is scanned
+              isActive={open} // Start / stop the scanner using this prop
+              showBox={true} // Show the box around the barcode / QR code
+            />
+          </View>
+        </View>
+        <View style={styles.controls}>
+          <Text style={styles.title}>Scanned Data</Text>
+          <Text>{scan?.data}</Text>
+        </View>
       </View>
     </Modal>
   );
-};
+});
 
 // Styles
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
+    //backgroundColor: 'red',
+    width: '100%',
+  },
+  close: {
+    flex: 0.1,
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.9)', // Semi-transparent black background
+    alignItems: 'flex-end',
+    backgroundColor: 'white',
   },
-  camera: {
-    width: width * 0.9, // 90% of screen width
-    height: height * 0.6, // 60% of screen height
-    borderRadius: 10, // Rounded corners for camera view
+  scannerBox: {
+    flex: 1,
+    width: '100%',
+    borderWidth: normalize(4),
   },
-  scanInstructions: {
-    position: 'absolute',
-    bottom: height * 0.05, // 5% of screen height from bottom
-    color: '#FFFFFF',
-    fontSize: width * 0.03, // Responsive font size
-    fontFamily: 'Inter-Bold', // Bold global font
-    textAlign: 'center',
-    paddingHorizontal: width * 0.05, // Padding for text
-  },
+  scanner: {flex: 1},
+  scannerWrapper: {flex: 0.5, backgroundColor: 'red'},
   closeButton: {
-    position: 'absolute',
-    top: height * 0.05, // 5% of screen height from top
-    right: width * 0.05, // 5% of screen width from right
-    backgroundColor: 'rgba(255, 255, 255, 0.8)', // Semi-transparent white
-    paddingVertical: height * 0.01, // Vertical padding
-    paddingHorizontal: width * 0.03, // Horizontal padding
-    borderRadius: 20, // Rounded button
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+    padding: 10,
+    borderRadius: 20,
   },
   closeButtonText: {
-    color: '#000000', // Black text color
-    fontSize: width * 0.03, // Responsive font size
-    fontFamily: 'Inter-Bold', // Bold global font
+    color: 'red',
+    fontFamily: 'Poppins-Bold',
+  },
+  controls: {
+    flex: 0.4,
+    backgroundColor: 'white',
+  },
+
+  title: {
+    fontFamily: 'Poppins-Bold',
+    fontSize: normalize(18),
+    paddingTop: normalize(15),
   },
 });
 
